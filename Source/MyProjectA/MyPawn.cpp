@@ -10,6 +10,10 @@
 #include "RotateComponent.h"
 #include "Components/ArrowComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
+#include "Kismet/GameplayStatics.h"
+
 
 
 
@@ -41,7 +45,7 @@ AMyPawn::AMyPawn()
 
 	Arrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
 	Arrow->SetupAttachment(Body);
-
+	
 	FloatingPawnMovement= CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Movement"));
 	Rotate = CreateDefaultSubobject<URotateComponent>(TEXT("Rotate"));
 	//
@@ -79,7 +83,6 @@ void AMyPawn::BeginPlay()
 
 	Rotate->Components.Add(Propeller_L);
 	Rotate->Components.Add(Propeller_R);
-	
 }
 
 // Called every frame
@@ -96,15 +99,28 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &AMyPawn::Fire);
-	PlayerInputComponent->BindAxis(TEXT("Pitch"), this, &AMyPawn::Pitch);
-	PlayerInputComponent->BindAxis(TEXT("Roll"), this, &AMyPawn::Roll);
-
+	UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+		if(EIC&&FireAction&&PitchAndRollAction)
+		{
+			EIC->BindAction(FireAction, ETriggerEvent::Triggered, this, &AMyPawn::Fire);
+			EIC->BindAction(PitchAndRollAction, ETriggerEvent::Triggered, this, &AMyPawn::PitchAndRoll);
+		}
+	
 }
 
-void AMyPawn::Fire()
+void AMyPawn::Fire(const FInputActionValue& Value)
 {
-	GetWorld()->SpawnActor<AMyPawn>(this->GetClass(),Arrow->K2_GetComponentLocation(),Arrow->K2_GetComponentRotation());
+	if (RocketTemplate)
+	{
+		GetWorld()->SpawnActor<AMyRocket>(RocketTemplate,Arrow->GetComponentTransform());
+	}
+}
+
+void AMyPawn::PitchAndRoll(const FInputActionValue& Value)
+{
+	FVector2D RotationValue = Value.Get<FVector2D>();
+	RotationValue* UGameplayStatics::GetWorldDeltaSeconds(GetWorld())*60.0f;
+	AddActorLocalRotation(FRotator(RotationValue.Y, 0.0f, RotationValue.X));
 }
 
 void AMyPawn::Pitch(float Value)
@@ -123,3 +139,4 @@ void AMyPawn::Roll(float Value)
 	}
 }
 
+//fmath randrange

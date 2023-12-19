@@ -13,7 +13,7 @@ AMyGameModeBase::AMyGameModeBase()
 		GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, TEXT("OnGameMode"));
 	}
 
-	DefaultPawnClass = AMyPawn::StaticClass();
+	DefaultPawnClass = AMyPawn::StaticClass();//classname apawn name 문법적으로는 자식
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	
 }
