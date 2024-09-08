@@ -5,14 +5,20 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "InputActionValue.h"
+#include "MyRocket.h"
+#include "GameFramework/Pawn.h"
+#include "AbilitySystemInterface.h"
 #include "MyPawn.generated.h"
 
 class UStaticMeshCompoenet;
 class UInputAction;
+class AMyRocket;
+class UAbilitySystemComponent;
+class UPlainAttributeSet;
 
 
 UCLASS()
-class MYPROJECTA_API AMyPawn : public APawn
+class MYPROJECTA_API AMyPawn : public APawn,public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -20,6 +26,15 @@ public:
 	// Sets default values for this pawn's properties
 	AMyPawn();
 
+public:
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Abilities")
+	UAbilitySystemComponent* AbilitySystemComponent;
+
+	UPROPERTY()
+	UPlainAttributeSet* AttributeSet;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -51,10 +66,10 @@ public:
 	TObjectPtr<class UFloatingPawnMovement> FloatingPawnMovement;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Data")
-	TObjectPtr<UInputAction> FireAction;
+	TObjectPtr<UInputAction> FireAction; 
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Data")
-	TObjectPtr<UInputAction> PitchAndRollAction;
+	TObjectPtr<UInputAction> PitchAndRollAction; 
 
 	TObjectPtr<class URotateComponent> Rotate;
 

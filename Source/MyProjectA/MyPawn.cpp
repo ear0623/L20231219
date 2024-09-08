@@ -13,6 +13,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "AbilitySystemComponent.h"
+#include "PlainAttributeSet.h"
+#include "PainGameplayAbility.h" // Include your gameplay ability header
+#include "PlainGameplayEffect.h" // Include your gameplay effect header
 
 
 
@@ -48,6 +52,7 @@ AMyPawn::AMyPawn()
 	
 	FloatingPawnMovement= CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Movement"));
 	Rotate = CreateDefaultSubobject<URotateComponent>(TEXT("Rotate"));
+	
 	//
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MS_Body(TEXT("/Script/Engine.StaticMesh'/Game/FBX/P38/SM_P38_Body.SM_P38_Body'"));
 	if (MS_Body.Succeeded())
@@ -74,6 +79,15 @@ AMyPawn::AMyPawn()
 	Arrow->AddLocalOffset(FVector(100.0f, 0.0f, 0.0f));
 	SpringArm->TargetArmLength = 150.0f;
 	SpringArm->bEnableCameraLag = true;
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AttributeSet = CreateDefaultSubobject<UPlainAttributeSet>(TEXT("AttributeSet"));
+
+}
+
+UAbilitySystemComponent* AMyPawn::GetAbilitySystemComponent() const
+{
+	return nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -99,12 +113,29 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+
 	UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-		if(EIC&&FireAction&&PitchAndRollAction)
+	if (EIC && FireAction && PitchAndRollAction)
+	{
+		EIC->BindAction(FireAction, ETriggerEvent::Triggered, this, &AMyPawn::Fire);
+		EIC->BindAction(PitchAndRollAction, ETriggerEvent::Triggered, this, &AMyPawn::PitchAndRoll);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not Equil"));
+		if (EIC == nullptr)
 		{
-			EIC->BindAction(FireAction, ETriggerEvent::Triggered, this, &AMyPawn::Fire);
-			EIC->BindAction(PitchAndRollAction, ETriggerEvent::Triggered, this, &AMyPawn::PitchAndRoll);
+			UE_LOG(LogTemp, Warning, TEXT("EIC_null"));
 		}
+		if (FireAction == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Fireaction_null"));
+		}
+		if (PitchAndRollAction == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PitchAndRoll_null"));
+		}
+	}
 	
 }
 

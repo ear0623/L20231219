@@ -18,6 +18,8 @@ AMyRocket::AMyRocket()
 	Rocket = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Rocket"));
 	Rocket->SetupAttachment(Box);
 
+	Box->AddLocalRotation(FRotator(0.0f, 90.0f, 0.0f));
+
 	Movement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement"));
 	Movement->ProjectileGravityScale = 0;
 	Movement->InitialSpeed = 2000.0f;
